@@ -40,4 +40,19 @@ private:
 	T1 m_t1;
 	T2 m_t2;
 };
+
+template<int Index, typename T0, typename T1>
+struct select {
+};
+template<typename T0, typename T1>
+struct select<0, T0, T1> {
+	using type = T0;
+};
+template<typename T0, typename T1>
+struct select<1, T0, T1> {
+	using type = T1;
+};
+template<int Index, typename T0, typename T1>
+using select_t = typename select<Index, T0, T1>::type;
+
 }

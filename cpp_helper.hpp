@@ -55,4 +55,7 @@ struct select<1, T0, T1> {
 template<int Index, typename T0, typename T1>
 using select_t = typename select<Index, T0, T1>::type;
 
+template<typename T, typename... U>
+concept same_as_one_of = (std::same_as<T,U> || ...);
+
 }

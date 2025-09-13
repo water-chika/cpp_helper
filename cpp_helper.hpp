@@ -4,8 +4,12 @@
 
 namespace cpp_helper {
 
+template<typename T1, typename T2, typename... Ts>
+struct overloads : public overloads<T1, overloads<T1, Ts...>>{
+};
+
 template<typename T1, typename T2>
-class overloads {
+class overloads<T1, T2> {
 public:
     constexpr overloads() = default;
 	constexpr overloads(T1 t1, T2 t2)

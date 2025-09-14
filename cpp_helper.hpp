@@ -5,7 +5,11 @@
 namespace cpp_helper {
 
 template<typename T1, typename T2, typename... Ts>
-struct overloads : public overloads<T1, overloads<T1, Ts...>>{
+struct overloads : public overloads<T1, overloads<T2, Ts...>>{
+    constexpr overloads() = default;
+    constexpr overloads(T1 t1, T2 t2, Ts... ts)
+        : overloads<T1, overloads<T2, Ts...>>{t1, {t2, ts...}}
+    {}
 };
 
 template<typename T1, typename T2>

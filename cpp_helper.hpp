@@ -1,6 +1,9 @@
 #pragma once
 
 #include <concepts>
+#include <cstddef>
+#include <cstdint>
+#include <array>
 
 namespace cpp_helper {
 
@@ -66,5 +69,55 @@ using select_t = typename select<Index, T0, T1>::type;
 
 template<typename T, typename... U>
 concept same_as_one_of = (std::same_as<T,U> || ...);
+
+template<size_t N>
+struct bitset{
+    bitset() = default;
+    bitset(int32_t i) : bit32{i} {}
+    struct reference {
+        bitset& bits;
+        size_t index;
+
+        reference& operator=(bool x) {
+            uint32_t bit32 = bits.bit32[index/32];
+            uint32_t mask = ~(1u << (index%32));
+            bits.bit32[index/32] = (bit32 & mask) | (x << (index%32));
+            return *this;
+        }
+        operator bool() const {
+            return (bits.bit32[index/32] >> (index%32)) & 1;
+        }
+        reference& flip() {
+            bits.bit32[index/32] ^= (1u << (index%32));
+            return *this;
+        }
+    };
+    operator uint32_t() const {
+        static_assert(N <= 32);
+        return bit32[0];
+    }
+
+    std::array<uint32_t,N/32> bit32;
+
+};
+template<size_t N1, size_t N2>
+requires (N1 + N2 > 32)
+bitset<N1+N2> operator+(const bitset<N1> lhs, const bitset<N2> rhs) {
+    bitset<N1+N2> res{};
+    static_assert(N1+N2 < 32);
+}
+template<size_t N1, size_t N2>
+requires (N1 + N2 <= 32 && N1+N2 > 0)
+bitset<N1+N2> operator+(const bitset<N1> lhs, const bitset<N2> rhs) {
+    bitset<N1+N2> res{};
+    res.bit32[0] = (lhs.bit32[0] << N2) | rhs.bit32[0];
+    return res;
+}
+template<size_t N1, size_t N2>
+requires (N1+N2 == 0)
+bitset<N1+N2> operator+(const bitset<N1> lhs, const bitset<N2> rhs) {
+    bitset<N1+N2> res{};
+    return res;
+}
 
 }

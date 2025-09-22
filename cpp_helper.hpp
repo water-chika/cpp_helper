@@ -13,44 +13,21 @@ struct overloads : public overloads<T1, overloads<T2, Ts...>>{
     constexpr overloads(T1 t1, T2 t2, Ts... ts)
         : overloads<T1, overloads<T2, Ts...>>{t1, {t2, ts...}}
     {}
+
+    using overloads<T1, overloads<T2, Ts...>>::operator();
 };
 
 template<typename T1, typename T2>
-class overloads<T1, T2> {
+class overloads<T1, T2> : public T1, public T2{
 public:
     constexpr overloads() = default;
 	constexpr overloads(T1 t1, T2 t2)
 		:
-		m_t1{t1},
-		m_t2{t2}
+		T1{t1},
+		T2{t2}
 	{}
-	template<typename... Args>
-		requires std::invocable<T1, Args...>
-	constexpr auto operator()(Args... args) && -> std::invoke_result_t<T1, Args...>{
-		return m_t1(args...);
-	}
-	
-	template<typename... Args>
-		requires std::invocable<T1, Args...>
-	constexpr auto operator()(Args... args) & -> std::invoke_result_t<T1, Args...> {
-		return m_t1(args...);
-	}
-
-	template<typename... Args>
-		requires std::invocable<T2, Args...>
-	constexpr auto operator()(Args... args) && -> std::invoke_result_t<T2, Args...> {
-		return m_t2(args...);
-	}
-
-	template<typename... Args>
-		requires std::invocable<T2, Args...>
-	constexpr auto operator()(Args... args) & -> std::invoke_result_t<T2, Args...> {
-		return m_t2(args...);
-	}
-
-private:
-	T1 m_t1;
-	T2 m_t2;
+    using T1::operator();
+    using T2::operator();
 };
 
 template<int Index, typename T0, typename T1>

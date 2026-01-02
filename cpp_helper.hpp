@@ -121,4 +121,49 @@ constexpr bitset<N1+N2> operator+(const bitset<N1> lhs, const bitset<N2> rhs) {
     return res;
 }
 
+template<typename T, size_t N>
+class array {
+public:
+    array() = default;
+    __device__ __host__
+    auto& operator[](size_t i) const {
+        return m_elements[i];
+    }
+    __device__ __host__
+    auto& operator[](size_t i) {
+        return m_elements[i];
+    }
+    class iterator{
+    public:
+        iterator(array& ref, size_t i) : m_ref{ref}, m_i{i} {}
+        iterator(const iterator&) = default;
+
+        iterator& operator++() {
+            m_i++;
+            return *this;
+        }
+        iterator operator++(int) {
+            m_i++;
+            return *this;
+        }
+
+        T& operator*() {
+            return m_ref[m_i];
+        }
+    private:
+        array& m_ref;
+        size_t m_i;
+    };
+    __device__ __host__
+    auto begin() {
+        return iterator{*this, 0};
+    }
+    __device__ __host__
+    auto end() {
+        return iterator{*this, N};
+    }
+private:
+    T m_elements[N];
+};
+
 }

@@ -121,6 +121,29 @@ constexpr bitset<N1+N2> operator+(const bitset<N1> lhs, const bitset<N2> rhs) {
     return res;
 }
 
+template<typename T>
+class iterator{
+public:
+    iterator(T& ref, size_t i) : m_ref{ref}, m_i{i} {}
+    iterator(const iterator&) = default;
+
+    iterator& operator++() {
+        m_i++;
+        return *this;
+    }
+    iterator operator++(int) {
+        m_i++;
+        return *this;
+    }
+
+    auto& operator*() {
+        return m_ref[m_i];
+    }
+private:
+    T& m_ref;
+    size_t m_i;
+};
+
 template<typename T, size_t N>
 class array {
 public:
@@ -133,27 +156,7 @@ public:
     auto& operator[](size_t i) {
         return m_elements[i];
     }
-    class iterator{
-    public:
-        iterator(array& ref, size_t i) : m_ref{ref}, m_i{i} {}
-        iterator(const iterator&) = default;
 
-        iterator& operator++() {
-            m_i++;
-            return *this;
-        }
-        iterator operator++(int) {
-            m_i++;
-            return *this;
-        }
-
-        T& operator*() {
-            return m_ref[m_i];
-        }
-    private:
-        array& m_ref;
-        size_t m_i;
-    };
     __device__ __host__
     auto begin() {
         return iterator{*this, 0};
@@ -164,6 +167,38 @@ public:
     }
 private:
     T m_elements[N];
+};
+
+__device__ __host__
+void swap(auto&& lhs, auto&& rhs) {
+    auto t = lhs;
+    lhs = rhs;
+    rhs = t;
+}
+
+template<typename T>
+class vector {
+public:
+    const size_t MAX_SIZE = 8;
+    __device__ __host__
+    auto size() {
+        return m_size;
+    }
+    __device__ __host__
+    void resize(size_t s) {
+        m_size = s;
+    }
+    __device__ __host__
+    auto begin() {
+        return iterator{*this, 0};
+    }
+    __device__ __host__
+    auto end() {
+        return iterator{*this, size()};
+    }
+private:
+    T m_elements[MAX_SIZE];
+    size_t m_size;
 };
 
 }

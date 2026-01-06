@@ -179,7 +179,7 @@ void swap(auto&& lhs, auto&& rhs) {
 template<typename T>
 class vector {
 public:
-    const size_t MAX_SIZE = 8;
+    static constexpr size_t MAX_SIZE = 8;
     __device__ __host__
     auto size() {
         return m_size;

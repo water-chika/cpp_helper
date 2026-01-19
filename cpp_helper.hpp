@@ -181,7 +181,16 @@ class vector {
 public:
     static constexpr size_t MAX_SIZE = 8;
     __device__ __host__
-    auto size() {
+    vector(size_t n) : m_size{n} {}
+    __device__ __host__
+    vector(std::initializer_list<T> ts) : m_elements{}, m_size{ts.size()} {
+        size_t i = 0;
+        for (auto ite = ts.begin(); ite != ts.end(); ++ite, ++i) {
+            m_elements[i] = *ite;
+        }
+    }
+    __device__ __host__
+    auto size() const {
         return m_size;
     }
     __device__ __host__
@@ -195,6 +204,14 @@ public:
     __device__ __host__
     auto end() {
         return iterator{*this, size()};
+    }
+    __device__ __host__
+    auto& operator[](size_t i) {
+	    return m_elements[i];
+    }
+    __device__ __host__
+    auto& operator[](size_t i) const {
+	    return m_elements[i];
     }
 private:
     T m_elements[MAX_SIZE];

@@ -8,7 +8,6 @@ add_library(cpp_helper INTERFACE
 target_include_directories(cpp_helper INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(cpp_helper INTERFACE cxx_std_20)
 
-find_package(hip REQUIRED)
 target_link_libraries(cpp_helper INTERFACE hip::host hip::device)
 
 add_executable(cpp_helper_test

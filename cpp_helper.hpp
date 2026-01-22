@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <array>
+#include <limits>
+#include <cassert>
 
 namespace cpp_helper {
 
@@ -175,6 +177,61 @@ void swap(auto&& lhs, auto&& rhs) {
     lhs = rhs;
     rhs = t;
 }
+#undef max
+template<typename T>
+auto checked_cast(auto v) {
+    assert(v < std::numeric_limits<T>::max());
+    return static_cast<T>(v);
+}
+
+template<typename T, typename SizeType, SizeType MaxSize>
+class small_vector {
+public:
+    __device__ __host__
+    small_vector(SizeType n) : m_size{n} {}
+    __device__ __host__
+    small_vector(std::initializer_list<T> ts) : m_elements{},
+        m_size{
+            checked_cast<SizeType>(ts.size())
+        }
+    {
+        size_t i = 0;
+        for (auto ite = ts.begin(); ite != ts.end(); ++ite, ++i) {
+            m_elements[i] = *ite;
+        }
+    }
+    __device__ __host__
+    auto size() const {
+        return m_size;
+    }
+    __device__ __host__
+    void resize(SizeType s) {
+        m_size = s;
+    }
+    __device__ __host__
+    auto begin() {
+        return iterator{*this, 0};
+    }
+    __device__ __host__
+    auto end() {
+        return iterator{*this, size()};
+    }
+    __device__ __host__
+    auto& operator[](size_t i) {
+	    return m_elements[i];
+    }
+    __device__ __host__
+    auto& operator[](size_t i) const {
+	    return m_elements[i];
+    }
+    template<typename... Args>
+    void emplace_back(Args... args) {
+        m_elements[m_size++] = T{args...};
+    }
+private:
+    T m_elements[MaxSize];
+    SizeType m_size;
+};
 
 template<typename T>
 class vector {
@@ -217,5 +274,10 @@ private:
     T m_elements[MAX_SIZE];
     size_t m_size;
 };
+
+struct empty_type {};
+
+template<bool Valid, typename T>
+using valid_if_t = select_t<Valid, empty_type,T>;
 
 }

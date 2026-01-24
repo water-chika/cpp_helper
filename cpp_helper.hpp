@@ -280,4 +280,12 @@ struct empty_type {};
 template<bool Valid, typename T>
 using valid_if_t = select_t<Valid, empty_type,T>;
 
+template<typename T, size_t N1, size_t N2>
+constexpr auto merge(std::array<T,N1> lhs, std::array<T,N2> rhs) {
+    std::array<T,N1+N2> res{};
+    std::move(lhs.begin(), lhs.end(), res.begin());
+    std::move(rhs.begin(), rhs.end(), res.begin()+lhs.size());
+    return res;
+}
+
 }

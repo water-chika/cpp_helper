@@ -288,4 +288,21 @@ constexpr auto merge(std::array<T,N1> lhs, std::array<T,N2> rhs) {
     return res;
 }
 
+template<typename T, size_t... Sizes>
+class multiple_array {
+public:
+
+private:
+    static constexpr size_t offset(size_t i) {
+        size_t res = 0;
+        size_t s[] = {Sizes...};
+        for (size_t j = 0; j < sizeof...(Sizes); ++j) {
+            res += s[j];
+        }
+        return res;
+    }
+    static constexpr auto offsets = std::to_array<size_t>({offset(Sizes)...});
+    std::array<T, (Sizes + ...)> m_values;
+};
+
 }

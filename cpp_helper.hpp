@@ -6,6 +6,8 @@
 #include <array>
 #include <limits>
 #include <cassert>
+#include <string>
+#include <cuchar>
 
 namespace cpp_helper {
 
@@ -304,5 +306,19 @@ private:
     static constexpr auto offsets = std::to_array<size_t>({offset(Sizes)...});
     std::array<T, (Sizes + ...)> m_values;
 };
+
+std::string to_mb(char16_t* u16_str) {
+    std::string res{};
+
+    std::mbstate_t state{};
+    for (auto p = u16_str; *p != 0; p++) {
+        auto str = std::array<char, MB_LEN_MAX>();
+        auto rc = std::c16rtomb(str.data(), *p, &state);
+        if (rc != (std::size_t)-1){
+            res += std::string_view{str.data(), rc};
+        }
+    }
+    return res;
+}
 
 }

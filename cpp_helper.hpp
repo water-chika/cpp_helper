@@ -8,6 +8,7 @@
 #include <cassert>
 #include <string>
 #include <cuchar>
+#include <climits>
 
 namespace cpp_helper {
 

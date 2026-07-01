@@ -322,4 +322,17 @@ std::string to_mb(char16_t* u16_str) {
     return res;
 }
 
+template<typename T>
+struct is_configure_structure {
+    static constexpr bool value = false;
+};
+template<typename T>
+concept configure = is_configure_structure<T>::value;
+
+struct empty_configure{};
+template<>
+struct is_configure_structure<empty_configure> {
+    static constexpr bool value = true;
+};
+
 }

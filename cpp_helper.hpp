@@ -335,4 +335,9 @@ struct is_configure_structure<empty_configure> {
     static constexpr bool value = true;
 };
 
+template<typename T>
+concept configurable = requires (T t) {
+    T{empty_configure{}};
+};
+
 }

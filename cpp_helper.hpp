@@ -334,6 +334,10 @@ template<>
 struct is_configure_structure<empty_configure> {
     static constexpr bool value = true;
 };
+class empty_configurable_class {
+public:
+    empty_configurable_class(const configure auto& conf) {}
+};
 
 template<typename T>
 concept configurable = requires (T t) {

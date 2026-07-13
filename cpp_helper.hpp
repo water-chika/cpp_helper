@@ -9,6 +9,8 @@
 #include <string>
 #include <cuchar>
 #include <climits>
+#include <vector>
+#include <iostream>
 
 namespace cpp_helper {
 
@@ -343,5 +345,67 @@ template<typename T>
 concept configurable = requires (T t) {
     T{empty_configure{}};
 };
+
+template<typename T>
+concept log_stream_contained = requires (T t) {
+    t.log_stream;
+};
+template<typename T>
+class add_log_stream : public T {
+public:
+    using parent = T;
+    add_log_stream(const configure auto& conf) : parent{conf},
+        log_stream{std::clog}
+    {
+    }
+    template<configure Conf>
+        requires log_stream_contained<Conf>
+    add_log_stream(const Conf& conf) : parent{conf},
+        log_stream{conf.log_stream}
+    {
+    }
+    auto& get_log_stream() {
+        return log_stream;
+    }
+private:
+    std::ostream& log_stream;
+};
+template<typename T>
+concept log_index_count_contained = requires (T t) {
+    t.log_index_count;
+};
+
+template<typename T>
+class add_log_enabled_with_index : public T {
+public:
+    using parent = T;
+    add_log_enabled_with_index(const configure auto& conf) : parent{conf},
+        enabled_log()
+    {
+    }
+    template<configure Conf>
+        requires log_index_count_contained<Conf>
+    add_log_enabled_with_index(const Conf& conf) : parent{conf},
+        enabled_log(conf.log_index_count)
+    {
+    }
+    static constexpr uint32_t LOG_INDEX = 0;
+    void log(uint32_t index, const auto& v) {
+        if (enabled_log[LOG_INDEX]) {
+            auto& log_stream = parent::get_log_stream();
+            log_stream << v;
+            log_stream.flush();
+        }
+    }
+private:
+    std::vector<bool> enabled_log;
+};
+template<typename T>
+using add_logger =
+    add_log_enabled_with_index<
+    add_log_stream<
+    T
+    >>
+;
 
 }

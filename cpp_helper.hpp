@@ -329,12 +329,18 @@ struct is_configure_structure {
     static constexpr bool value = false;
 };
 template<typename T>
+concept contain_is_configure = requires (T t) {
+    t.is_configure;
+};
+template<contain_is_configure T>
+struct is_configure_structure<T> {
+    static constexpr bool value = T::is_configure;
+};
+template<typename T>
 concept configure = is_configure_structure<T>::value;
 
-struct empty_configure{};
-template<>
-struct is_configure_structure<empty_configure> {
-    static constexpr bool value = true;
+struct empty_configure{
+    static constexpr bool is_configure = true;
 };
 class empty_configurable_class {
 public:
@@ -374,7 +380,6 @@ template<typename T>
 concept log_index_count_contained = requires (T t) {
     t.log_index_count;
 };
-
 template<typename T>
 class add_log_enabled_with_index : public T {
 public:
@@ -390,6 +395,9 @@ public:
     {
     }
     static constexpr uint32_t LOG_INDEX = 0;
+    constexpr uint32_t get_log_index() {
+        return LOG_INDEX;
+    }
     void log(uint32_t index, const auto& v) {
         if (enabled_log[LOG_INDEX]) {
             auto& log_stream = parent::get_log_stream();
@@ -400,6 +408,27 @@ public:
 private:
     std::vector<bool> enabled_log;
 };
+
+template<configure T>
+struct add_configure_with_log_index_count_structure : public T {
+    using type = add_configure_with_log_index_count_structure;
+    uint32_t log_index_count;
+};
+template<configure T>
+    requires log_index_count_contained<T>
+struct add_configure_with_log_index_count_structure<T> {
+    using type = T;
+};
+
+template<configure T>
+using add_configure_with_log_index_count = typename add_configure_with_log_index_count_structure<T>::type;
+
+auto increment_configure_log_index_count(const configure auto& conf) {
+    auto res = add_configure_with_log_index_count<std::remove_cvref_t<decltype(conf)>>{conf};
+    res.log_index_count++;
+    return res;
+}
+
 template<typename T>
 using add_logger =
     add_log_enabled_with_index<

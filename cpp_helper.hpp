@@ -437,4 +437,9 @@ using add_logger =
     >>
 ;
 
+class empty_class {
+public:
+    empty_class(const configure auto& conf) {}
+};
+
 }
